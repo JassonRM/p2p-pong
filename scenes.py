@@ -1,0 +1,85 @@
+import pygame
+from pygame.locals import (
+    K_UP,
+    K_DOWN,
+    K_ESCAPE,
+    KEYDOWN,
+    KEYUP,
+    K_SPACE,
+)
+from player import Player
+
+
+class Scene:
+    def __init__(self):
+        pass
+
+    def render(self, screen):
+        raise NotImplementedError
+
+    def update(self):
+        raise NotImplementedError
+
+    def handle_events(self, events):
+        raise NotImplementedError
+
+
+class Menu(Scene):
+    def __init__(self):
+        super().__init__()
+        self.font = pygame.font.SysFont('Arial', 56)
+        self.sfont = pygame.font.SysFont('Arial', 32)
+
+    def render(self, screen):
+        screen.fill((0, 0, 0))
+        text1 = self.font.render('P2P Pong', True, (255, 255, 255))
+        text2 = self.sfont.render('> press space to start <', True, (255, 255, 255))
+        screen.blit(text1, ((self.game.width - text1.get_width()) // 2, self.game.height // 3))
+        screen.blit(text2, ((self.game.width - text2.get_width()) // 2, self.game.height * 2 // 3))
+
+    def update(self):
+        pass
+
+    def handle_events(self, events):
+        for e in events:
+            if e.type == KEYDOWN and e.key == K_SPACE:
+                self.game.go_to(Match())
+
+
+class Match(Scene):
+    def __init__(self):
+        self.player1 = None
+        self.player2 = None
+        self.pressed_up = False
+        self.pressed_down = False
+
+    def render(self, screen):
+        screen.fill((0, 0, 0))
+        screen.blit(self.player1.surf, self.player1.rect)
+        screen.blit(self.player2.surf, self.player2.rect)
+
+    def update(self):
+        if self.player1 is None:
+            self.player1 = Player()
+            self.player1.move(0, (self.game.height - self.player1.rect.height) // 2)
+            self.player2 = Player()
+            self.player2.move(self.game.width - self.player2.rect.width,
+                              (self.game.height - self.player2.rect.height) // 2)
+
+        if self.pressed_up:
+            self.player1.up()
+        elif self.pressed_down:
+            self.player1.down()
+
+    def handle_events(self, events):
+        for e in events:
+            if e.type == KEYDOWN:
+                if e.key == K_UP:
+                    self.pressed_up = True
+                elif e.key == K_DOWN:
+                    self.pressed_down = True
+            elif e.type == KEYUP:
+                if e.key == K_UP:
+                    self.pressed_up = False
+                elif e.key == K_DOWN:
+                    self.pressed_down = False
