@@ -6,6 +6,7 @@ from pygame.locals import QUIT
 class Game:
     def __init__(self, width, height):
         pygame.init()
+        pygame.display.set_caption("P2P Pong")
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode([self.width, self.height])
@@ -24,9 +25,6 @@ class Game:
 
             if pygame.event.get(QUIT):
                 self.running = False
-
-            # Set background
-            self.screen.fill((0, 0, 0))
 
             # Update scene
             self.scene.handle_events(pygame.event.get())

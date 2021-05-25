@@ -27,8 +27,8 @@ class Scene:
 class Menu(Scene):
     def __init__(self):
         super().__init__()
-        self.font = pygame.font.SysFont('Arial', 56)
-        self.sfont = pygame.font.SysFont('Arial', 32)
+        self.font = pygame.font.Font('resources/bit5x3.ttf', 56)
+        self.sfont = pygame.font.Font('resources/bit5x3.ttf', 32)
 
     def render(self, screen):
         screen.fill((0, 0, 0))
@@ -50,11 +50,29 @@ class Match(Scene):
     def __init__(self):
         self.player1 = None
         self.player2 = None
+        self.p1_score = 0
+        self.p2_score = 0
         self.pressed_up = False
         self.pressed_down = False
+        self.font = pygame.font.Font('resources/bit5x3.ttf', 120)
 
     def render(self, screen):
         screen.fill((0, 0, 0))
+
+        # Render center limit
+        center = pygame.Surface((20, self.game.height))
+        center.fill((255, 255, 255))
+        center_rect = center.get_rect()
+        center_rect.move_ip((self.game.width - 20) // 2, 0)
+        screen.blit(center, center_rect)
+
+        # Render scores
+        score1 = self.font.render(str(self.p1_score), True, (255, 255, 255))
+        score2 = self.font.render(str(self.p2_score), True, (255, 255, 255))
+        screen.blit(score1, (self.game.width // 3 - score1.get_rect().centerx, 100))
+        screen.blit(score2, (2 * self.game.width // 3 - score1.get_rect().centerx, 100))
+
+        # Render players
         screen.blit(self.player1.surf, self.player1.rect)
         screen.blit(self.player2.surf, self.player2.rect)
 
