@@ -129,7 +129,7 @@ class Match(Scene):
             else:
                 self.ball.move((self.game.width - self.ball.rect.width) // 2,
                                (self.game.height - self.ball.rect.height) // 2)
-        
+
         self.ball.update()
 
     def handle_events(self, events):
@@ -147,13 +147,22 @@ class Match(Scene):
 
 class GameOver(Scene):
     def __init__(self):
-        pass
+        super().__init__()
+        self.font = pygame.font.Font('resources/bit5x3.ttf', 56)
+        self.sfont = pygame.font.Font('resources/bit5x3.ttf', 32)
 
     def render(self, screen):
-        raise NotImplementedError
+        screen.fill((0, 0, 0))
+        message = 'Congratulations player ' + str(self.game.winner)
+        text1 = self.font.render(message, True, (255, 255, 255))
+        text2 = self.sfont.render('> press space to return to menu <', True, (255, 255, 255))
+        screen.blit(text1, ((self.game.width - text1.get_width()) // 2, self.game.height // 3))
+        screen.blit(text2, ((self.game.width - text2.get_width()) // 2, self.game.height * 2 // 3))
 
     def update(self):
-        raise NotImplementedError
+        pass
 
     def handle_events(self, events):
-        raise NotImplementedError
+        for e in events:
+            if e.type == KEYDOWN and e.key == K_SPACE:
+                self.game.go_to(Menu())
