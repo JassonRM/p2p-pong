@@ -8,7 +8,7 @@ from pygame.locals import (
     K_SPACE,
 )
 from player import Player
-
+from ball import Ball
 
 class Scene:
     def __init__(self):
@@ -50,6 +50,7 @@ class Match(Scene):
     def __init__(self):
         self.player1 = None
         self.player2 = None
+        self.ball = None
         self.p1_score = 0
         self.p2_score = 0
         self.pressed_up = False
@@ -76,6 +77,9 @@ class Match(Scene):
         screen.blit(self.player1.surf, self.player1.rect)
         screen.blit(self.player2.surf, self.player2.rect)
 
+        # Render ball
+        screen.blit(self.ball.surf, self.ball.rect)
+
     def update(self):
         if self.player1 is None:
             self.player1 = Player()
@@ -83,11 +87,16 @@ class Match(Scene):
             self.player2 = Player()
             self.player2.move(self.game.width - self.player2.rect.width,
                               (self.game.height - self.player2.rect.height) // 2)
+            self.ball = Ball()
+            self.ball.move((self.game.width - self.ball.rect.width) // 2,
+                              (self.game.height - self.ball.rect.height) // 2)
 
         if self.pressed_up:
             self.player1.up()
         elif self.pressed_down:
             self.player1.down()
+
+        self.ball.update()
 
     def handle_events(self, events):
         for e in events:
