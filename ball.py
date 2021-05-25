@@ -9,7 +9,7 @@ class Ball(pygame.sprite.Sprite):
         self.surf.fill((255, 255, 255))
         self.rect = self.surf.get_rect()
         self.speed = 5
-        self.speed_x = -0.6
+        self.speed_x = 0.6
         self.speed_y = 0.4
 
     def move(self, x, y):
@@ -18,8 +18,8 @@ class Ball(pygame.sprite.Sprite):
     def player_bounce(self, angle): # angle from -1 to 1 where 0 is the center of the paddle
         bounceAngle = angle * 5 * math.pi / 12 # max angle of 75 degrees
         moving_right = self.speed_x > 0
-        self.speed_x = self.speed * math.cos(bounceAngle)
-        self.speed_y = self.speed * -math.sin(bounceAngle)
+        self.speed_x = math.cos(bounceAngle)
+        self.speed_y = -math.sin(bounceAngle)
 
         if moving_right:
             self.speed_x *= -1

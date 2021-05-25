@@ -1,4 +1,11 @@
 import pygame
+from enum import Enum
+
+
+class CollisionSide(Enum):
+    RIGHT = 0
+    LEFT = 1
+    NO_COLLISION = 2
 
 
 class Player(pygame.sprite.Sprite):
@@ -16,3 +23,15 @@ class Player(pygame.sprite.Sprite):
 
     def down(self):
         self.rect.move_ip(0, 5)
+
+    def collision(self, ball):
+        if ball.bottom >= self.rect.top and \
+                ball.top <= self.rect.bottom:
+            if ball.left <= self.rect.right <= ball.right:
+                return CollisionSide.RIGHT
+            elif ball.right >= self.rect.left >= ball.left:
+                return CollisionSide.LEFT
+            else:
+                return CollisionSide.NO_COLLISION
+        else:
+            return CollisionSide.NO_COLLISION

@@ -7,8 +7,9 @@ from pygame.locals import (
     KEYUP,
     K_SPACE,
 )
-from player import Player
+from player import Player, CollisionSide
 from ball import Ball
+
 
 class Scene:
     def __init__(self):
@@ -89,12 +90,28 @@ class Match(Scene):
                               (self.game.height - self.player2.rect.height) // 2)
             self.ball = Ball()
             self.ball.move((self.game.width - self.ball.rect.width) // 2,
-                              (self.game.height - self.ball.rect.height) // 2)
+                           (self.game.height - self.ball.rect.height) // 2)
 
-        if self.pressed_up:
-            self.player1.up()
-        elif self.pressed_down:
-            self.player1.down()
+        if self.game.player == 1:
+            player = self.player1
+        else:
+            player = self.player2
+
+        # Player movement and collisions
+        if self.pressed_up and player.rect.top > 0:
+            player.up()
+        elif self.pressed_down and player.rect.bottom < self.game.height:
+            player.down()
+
+        # Ball collisions
+        if self.ball.rect.top <= 0 or self.ball.rect.bottom >= self.game.height:
+            self.ball.border_bounce()
+
+        collision = player.collision(self.ball.rect)
+        if (self.game.player == 1 and collision == CollisionSide.RIGHT) or \
+                (self.game.player == 2 and collision == CollisionSide.LEFT):
+            angle = (player.rect.centery - self.ball.rect.centery) / player.rect.height
+            self.ball.player_bounce(angle)
 
         self.ball.update()
 

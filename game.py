@@ -14,6 +14,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.scene = Menu()
         self.scene.game = self
+        self.player = 2
 
         # TODO init network connection
 
