@@ -113,6 +113,23 @@ class Match(Scene):
             angle = (player.rect.centery - self.ball.rect.centery) / player.rect.height
             self.ball.player_bounce(angle)
 
+        if self.game.player == 1 and self.ball.rect.left <= 0:
+            self.p2_score += 1
+            if self.p2_score == 10:
+                self.game.winner = 2
+                self.game.go_to(GameOver())
+            else:
+                self.ball.move((self.game.width - self.ball.rect.width) // 2,
+                               (self.game.height - self.ball.rect.height) // 2)
+        elif self.game.player == 2 and self.ball.rect.right >= self.game.width:
+            self.p1_score += 1
+            if self.p1_score == 10:
+                self.game.winner = 1
+                self.game.go_to(GameOver())
+            else:
+                self.ball.move((self.game.width - self.ball.rect.width) // 2,
+                               (self.game.height - self.ball.rect.height) // 2)
+        
         self.ball.update()
 
     def handle_events(self, events):
@@ -127,3 +144,16 @@ class Match(Scene):
                     self.pressed_up = False
                 elif e.key == K_DOWN:
                     self.pressed_down = False
+
+class GameOver(Scene):
+    def __init__(self):
+        pass
+
+    def render(self, screen):
+        raise NotImplementedError
+
+    def update(self):
+        raise NotImplementedError
+
+    def handle_events(self, events):
+        raise NotImplementedError
