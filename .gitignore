@@ -1,0 +1,10 @@
+
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/p2p-pong.iml
+.idea/vcs.xml
+__pycache__/ball.cpython-39.pyc
+__pycache__/game.cpython-39.pyc
+__pycache__/player.cpython-39.pyc
+__pycache__/scenes.cpython-39.pyc
