@@ -3,7 +3,7 @@ import json
 
 
 class PlayerInfo():
-    def __init__(self,port,ip,time = 0,name= "No"):
+    def __init__(self,port ="",ip="",time = 0,name= "No"):
         self.port = port
         self.ip = ip
         self.name = name

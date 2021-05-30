@@ -1,38 +1,42 @@
 import socket
+import select
+
+
+def msg_to_addr(data):
+    ip, port = data.decode('utf-8').strip().split(':')
+    return (ip, int(port))
 
 
 class Connection:
-    def __init__(self, server, port, mode):
-        self.address = server
+    def __init__(self, host, port):
+        self.host = host
         self.port = port
-        self.mode = mode
-        self.sock = 0
-        self.connection = 0
- #
-    def init_host(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = (self.address, self.port)
-        self.sock.bind(server_address)
-        self.sock.listen(1)
-        self.connection, client = self.sock.accept()
+        self.sendToAddress = 0
+        self.socket = 0
 
-    def write(self, data):
-        data += "\r"
-        self.connection.sendall(data)
+    def hole_punching(self):
+        self.socket = socket.socket(socket.AF_INET,  # Internet
+                                    socket.SOCK_DGRAM)  # UDP
+        self.socket.sendto(b'0', self.sendToAddress)
+        while True:
+            data, addr = self.socket.recvfrom(1024)
+            print('client received: {} {}'.format(addr, data))
+            addr = msg_to_addr(data)
+            self.sendToAddress = addr
+            self.socket.sendto(b'0', addr)
+            data, addr = self.socket.recvfrom(1024)
+            print('client received: {} {}'.format(addr, data))
 
-    def receive(self):
-        char = ""
-        new_char = ""
-        while new_char != '\r':
-            new_char = self.connection.recv(1)
-            char += new_char
-        return char
+    def write(self, message):
+        message = message.encode(encoding='UTF-8', errors='strict')
+        self.socket.sendto(message, self.sendToAddress)
 
-    def init_client(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = (self.address, self.port)
-        self.sock.connect(server_address)
-        self.connection = self.sock
-
-    def set_port(self, port):
-        self.port = port
+    def read(self):
+        ready_sockets, _, _ = select.select(
+            [self.socket], [], [], 10
+        )
+        if ready_sockets:
+            message = self.socket.recvfrom(1024)
+            return message.decode('utf8', 'strict')
+        else:
+            return "No"
