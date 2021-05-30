@@ -1,7 +1,7 @@
 import pygame
 from scenes import Menu
 from pygame.locals import QUIT
-
+from connection import Connection
 
 class Game:
     def __init__(self, width, height):
@@ -14,10 +14,10 @@ class Game:
         self.clock = pygame.time.Clock()
         self.scene = Menu()
         self.scene.game = self
-        self.player = 1
+        self.player = 2
         self.winner = None
-
-        # TODO init network connection
+        self.connection = Connection("127.0.0.1", 64000, True)
+        self.connection.init_client()
 
     def run(self):
         self.running = True

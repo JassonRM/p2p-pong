@@ -18,14 +18,10 @@ class Connection:
 
     def write(self, data):
         data += "\r"
-        self.connection.sendall(data)
+        self.connection.sendall(data.encode())
 
     def receive(self):
-        char = ""
-        new_char = ""
-        while new_char != '\r':
-            new_char = self.connection.recv(1)
-            char += new_char
+        char = self.connection.recv(1024).decode()
         return char
 
     def init_client(self):
