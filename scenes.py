@@ -9,6 +9,7 @@ from pygame.locals import (
 )
 from player import Player, CollisionSide
 from ball import Ball
+import json
 
 
 class Scene:
@@ -94,8 +95,10 @@ class Match(Scene):
 
         if self.game.player == 1:
             player = self.player1
+            enemy = self.player2
         else:
             player = self.player2
+            enemy = self.player1
 
         # Player movement and collisions
         if self.pressed_up and player.rect.top > 0:
@@ -103,32 +106,82 @@ class Match(Scene):
         elif self.pressed_down and player.rect.bottom < self.game.height:
             player.down()
 
-        # Ball collisions
-        if self.ball.rect.top <= 0 or self.ball.rect.bottom >= self.game.height:
-            self.ball.border_bounce()
+        # Ball collisions if in my playing field
+        if self.game.player == 1 and self.ball.rect.centerx < self.game.width // 2 or \
+        self.game.player == 2 and self.ball.rect.centerx > self.game.width // 2:
+            if self.ball.rect.top <= 0 or self.ball.rect.bottom >= self.game.height:
+                self.ball.border_bounce()
 
-        collision = player.collision(self.ball.rect)
-        if (self.game.player == 1 and collision == CollisionSide.RIGHT) or \
-                (self.game.player == 2 and collision == CollisionSide.LEFT):
-            angle = (player.rect.centery - self.ball.rect.centery) / player.rect.height
-            self.ball.player_bounce(angle)
+            collision = player.collision(self.ball.rect)
+            if (self.game.player == 1 and collision == CollisionSide.RIGHT) or \
+                    (self.game.player == 2 and collision == CollisionSide.LEFT):
+                angle = (player.rect.centery - self.ball.rect.centery) / player.rect.height
+                self.ball.player_bounce(angle)
 
-        if self.game.player == 1 and self.ball.rect.left <= 0:
-            self.p2_score += 1
-            if self.p2_score == 10:
-                self.game.winner = 2
-                self.game.go_to(GameOver())
-            else:
-                self.ball.move((self.game.width - self.ball.rect.width) // 2,
-                               (self.game.height - self.ball.rect.height) // 2)
-        elif self.game.player == 2 and self.ball.rect.right >= self.game.width:
+            enemy_score = False
+            if self.game.player == 1 and self.ball.rect.left <= 0:
+                self.p2_score += 1
+                enemy_score = True
+                if self.p2_score == 10:
+                    self.game.winner = 2
+                    self.game.go_to(GameOver())
+                else:
+                    self.ball.move((self.game.width - self.ball.rect.width) // 2,
+                                   (self.game.height - self.ball.rect.height) // 2)
+            elif self.game.player == 2 and self.ball.rect.right >= self.game.width:
+                self.p1_score += 1
+                enemy_score = True
+                if self.p1_score == 10:
+                    self.game.winner = 1
+                    self.game.go_to(GameOver())
+                else:
+                    self.ball.move((self.game.width - self.ball.rect.width) // 2,
+                                   (self.game.height - self.ball.rect.height) // 2)
+
+            message = {"position": player.rect.y,
+                       "ballx": self.ball.rect.x,
+                       "bally": self.ball.rect.y,
+                       "balldx": self.ball.speed_x,
+                       "balldy": self.ball.speed_y,
+                       "score": enemy_score,
+                       "winner": self.game.winner}
+
+        # Send only player position
+        else:
+            message = {"position": player.rect.y,
+                       "score": False,
+                       "winner": self.game.winner
+                       }
+
+        # Send message
+        self.game.connection.write(json.dumps(message))
+
+        # Receive enemy status
+        data = self.game.connection.receive()
+        enemy_status = json.loads(data)
+
+        # Update score
+        if enemy_status["score"] and self.game.player == 1:
             self.p1_score += 1
-            if self.p1_score == 10:
-                self.game.winner = 1
-                self.game.go_to(GameOver())
-            else:
-                self.ball.move((self.game.width - self.ball.rect.width) // 2,
-                               (self.game.height - self.ball.rect.height) // 2)
+        elif enemy_status["score"] and self.game.player == 2:
+            self.p2_score += 1
+
+        if enemy_status["winner"] != 0:
+            self.game.winner = enemy_status["winner"]
+            self.game.go_to(GameOver())
+
+        # Update enemy player
+        enemy.movey(enemy_status["position"])
+
+        # Update ball if in enemy's field
+        if self.game.player == 1 and self.ball.rect.centerx > self.game.width // 2 or \
+                self.game.player == 2 and self.ball.rect.centerx < self.game.width // 2:
+            self.ball.set(enemy_status["ballx"],
+                          enemy_status["bally"],
+                          enemy_status["balldx"],
+                          enemy_status["balldy"])
+
+        print(data)
 
         self.ball.update()
 
@@ -165,4 +218,5 @@ class GameOver(Scene):
     def handle_events(self, events):
         for e in events:
             if e.type == KEYDOWN and e.key == K_SPACE:
+                self.game.winner = 0
                 self.game.go_to(Menu())

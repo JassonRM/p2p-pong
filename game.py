@@ -15,7 +15,7 @@ class Game:
         self.scene = Menu()
         self.scene.game = self
         self.player = 1
-        self.winner = None
+        self.winner = 0
 
         # TODO init network connection
 

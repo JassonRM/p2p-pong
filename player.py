@@ -16,7 +16,10 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect()
 
     def move(self, x, y):
-        self.rect.move_ip(x, y)
+        self.rect.update(x, y, self.rect.width, self.rect.height)
+
+    def movey(self, y):
+        self.rect.update(self.rect.x, y, self.rect.width, self.rect.height)
 
     def up(self):
         self.rect.move_ip(0, -5)
