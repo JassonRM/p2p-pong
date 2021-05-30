@@ -2,6 +2,7 @@ import socket
 
 import pygame_menu.events
 from pygame_menu import Menu
+import http_request
 from tkinter import messagebox as mbox
 
 
@@ -24,8 +25,7 @@ class PlayersMenu(Menu):
         self.add.text_input("Name:", default="Prof")
         local_ip = socket.gethostbyname(socket.gethostname())
         self.add.label(f"Your Ip: {local_ip}")
-        self.inputPort.get_value()
-        self.add.button("Start",pygame_menu.events.EXIT)
+
 
 
 

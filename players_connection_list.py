@@ -43,7 +43,7 @@ class PlayerList():
     def remove(self,json_str):
         player = json.loads(json_str)
         for ingo in self.playerList:
-            if ingo.ip == player["ip"]:
+            if ingo.ip == player["ip"] and ingo.port == player["port"]:
                 self.playerList.remove(ingo)
                 return
 
