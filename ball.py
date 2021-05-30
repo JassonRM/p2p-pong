@@ -15,6 +15,11 @@ class Ball(pygame.sprite.Sprite):
     def move(self, x, y):
         self.rect.update(x, y, self.rect.width, self.rect.height)
 
+    def set(self, x, y, dx, dy):
+        self.rect.update(x, y, self.rect.width, self.rect.height)
+        self.speed_x = dx
+        self.speed_y = dy
+
     def player_bounce(self, angle):  # angle from -1 to 1 where 0 is the center of the paddle
         bounceAngle = angle * 5 * math.pi / 12  # max angle of 75 degrees
         moving_right = self.speed_x > 0
