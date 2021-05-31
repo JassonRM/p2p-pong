@@ -3,7 +3,8 @@ from scenes import Menu
 from pygame.locals import QUIT
 from connection import Connection
 import threading
-
+import random
+import json
 
 class Game:
     def __init__(self, width, height, server_ip):

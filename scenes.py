@@ -10,6 +10,7 @@ from pygame.locals import (
 from player import Player, CollisionSide
 from ball import Ball
 import json
+import random
 
 
 class Scene:
@@ -32,7 +33,8 @@ class Menu(Scene):
         self.font = pygame.font.Font('resources/bit5x3.ttf', 56)
         self.sfont = pygame.font.Font('resources/bit5x3.ttf', 32)
         self.info_text = "Waiting for another player..."
-
+        self.ready = False
+        self.my_ticket = random.random()
 
     def render(self, screen):
         screen.fill((0, 0, 0))
@@ -42,14 +44,26 @@ class Menu(Scene):
         screen.blit(info, ((self.game.width - info.get_width()) // 2, self.game.height * 2 // 3))
 
     def update(self):
-        if self.game.network_thread.is_alive():
-            self.info_text = "Waiting for another player..."
-        else:
-            self.info_text = '> Press space to start <'
+        if not self.game.network_thread.is_alive():
+            self.info_text = 'Player found. Connecting...'
+            self.game.connection.write(str(self.my_ticket))
+            received = self.game.connection.read()
+            if received is not None:
+                try:
+                    other_ticket = float(received)
+                    if self.my_ticket > other_ticket:
+                        self.game.player = 1
+                    elif other_ticket > self.my_ticket:
+                        self.game.player = 2
+                    self.info_text = '> Press space to start <'
+                    self.ready = True
+
+                except ValueError: # This means received is no longer the ticket and the game started
+                    self.game.go_to(Match())
 
     def handle_events(self, events):
         for e in events:
-            if e.type == KEYDOWN and e.key == K_SPACE:
+            if e.type == KEYDOWN and e.key == K_SPACE and self.ready:
                 self.game.go_to(Match())
 
 
@@ -80,12 +94,13 @@ class Match(Scene):
         screen.blit(score1, (self.game.width // 3 - score1.get_rect().centerx, 100))
         screen.blit(score2, (2 * self.game.width // 3 - score1.get_rect().centerx, 100))
 
-        # Render players
-        screen.blit(self.player1.surf, self.player1.rect)
-        screen.blit(self.player2.surf, self.player2.rect)
+        if self.player1 is not None:
+            # Render players
+            screen.blit(self.player1.surf, self.player1.rect)
+            screen.blit(self.player2.surf, self.player2.rect)
 
-        # Render ball
-        screen.blit(self.ball.surf, self.ball.rect)
+            # Render ball
+            screen.blit(self.ball.surf, self.ball.rect)
 
     def update(self):
         if self.player1 is None:
@@ -163,11 +178,10 @@ class Match(Scene):
 
         # Receive enemy status
         data = self.game.connection.read()
-        if data is None:
+        try:
+            enemy_status = json.loads(data)
+        except Exception:
             return
-        print("Data: ", data)
-        enemy_status = json.loads(data)
-        print("JSON: ", enemy_status)
 
         # Update score
         if enemy_status["score"] and self.game.player == 1:
@@ -189,8 +203,6 @@ class Match(Scene):
                           enemy_status["bally"],
                           enemy_status["balldx"],
                           enemy_status["balldy"])
-
-        print(data)
 
         self.ball.update()
 
