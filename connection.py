@@ -31,7 +31,7 @@ class Connection:
 
     def read(self):
         ready_sockets, _, _ = select.select(
-            [self.socket], [], [], 0.015
+            [self.socket], [], [], 1
         )
         if ready_sockets:
             message, _ = self.socket.recvfrom(1024)

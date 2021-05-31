@@ -171,6 +171,10 @@ class Match(Scene):
         # Send only player position
         else:
             message = {"position": player.rect.y,
+                       "ballx": self.ball.rect.x,
+                       "bally": self.ball.rect.y,
+                       "balldx": self.ball.speed_x,
+                       "balldy": self.ball.speed_y,
                        "score": False,
                        "winner": self.game.winner
                        }
@@ -184,7 +188,7 @@ class Match(Scene):
         # Check if connection is alive
         if data is None:
             self.lost_packets += 1
-            if self.lost_packets > 120:
+            if self.lost_packets > 3:
                 self.game.go_to(ConnectionLost())
             return
 
