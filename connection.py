@@ -18,14 +18,13 @@ class Connection:
         self.socket = socket.socket(socket.AF_INET,  # Internet
                                     socket.SOCK_DGRAM)  # UDP
         self.socket.sendto(b'0', (self.host, self.port))
-        while True:
-            data, addr = self.socket.recvfrom(1024)
-            print('client received: {} {}'.format(addr, data))
-            addr = msg_to_addr(data)
-            self.sendToAddress = addr
-            self.socket.sendto(b'0', addr)
-            data, addr = self.socket.recvfrom(1024)
-            print('client received: {} {}'.format(addr, data))
+        data, addr = self.socket.recvfrom(1024)
+        print('client received: {} {}'.format(addr, data))
+        addr = msg_to_addr(data)
+        self.sendToAddress = addr
+        self.socket.sendto(b'0', addr)
+        data, addr = self.socket.recvfrom(1024)
+        print('client received: {} {}'.format(addr, data))
 
     def write(self, message):
         message = message.encode(encoding='UTF-8', errors='strict')

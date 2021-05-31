@@ -2,7 +2,7 @@ from time import sleep
 import pygame_menu.events
 from pygame_menu import Menu
 from player_connection_info import PlayerInfo
-
+import main
 
 class PlayersMenu(Menu):
     def __init__(self, len, width, name, connection, theme=0):
@@ -10,7 +10,6 @@ class PlayersMenu(Menu):
         self.inputPort = 0
         self.player_info = PlayerInfo()
         self.connection = connection
-        self.add.text_input('Name: ', default='Player')
         self.add.button("Start", self.init_connection)
         self.add.button("Quit", pygame_menu.events.EXIT)
 
@@ -24,3 +23,5 @@ class PlayersMenu(Menu):
         self.add.label("Found a player")
         sleep(1)
         self.close()
+        main.start_the_game()
+
