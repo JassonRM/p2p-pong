@@ -4,20 +4,18 @@ from pygame.locals import QUIT
 
 
 class Game:
-    def __init__(self, width, height):
-        pygame.init()
-        pygame.display.set_caption("P2P Pong")
+    def __init__(self, width, height, screen, connection):
+
         self.width = width
         self.height = height
-        self.screen = pygame.display.set_mode([self.width, self.height])
+        self.screen = screen
         self.running = False
         self.clock = pygame.time.Clock()
         self.scene = Menu()
         self.scene.game = self
         self.player = 1
         self.winner = 0
-
-        # TODO init network connection
+        self.connection = connection
 
     def run(self):
         self.running = True

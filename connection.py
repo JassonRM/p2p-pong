@@ -4,7 +4,7 @@ import select
 
 def msg_to_addr(data):
     ip, port = data.decode('utf-8').strip().split(':')
-    return (ip, int(port))
+    return ip, int(port)
 
 
 class Connection:
@@ -17,7 +17,7 @@ class Connection:
     def hole_punching(self):
         self.socket = socket.socket(socket.AF_INET,  # Internet
                                     socket.SOCK_DGRAM)  # UDP
-        self.socket.sendto(b'0', (self.host,self.port))
+        self.socket.sendto(b'0', (self.host, self.port))
         while True:
             data, addr = self.socket.recvfrom(1024)
             print('client received: {} {}'.format(addr, data))

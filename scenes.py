@@ -108,7 +108,7 @@ class Match(Scene):
 
         # Ball collisions if in my playing field
         if self.game.player == 1 and self.ball.rect.centerx < self.game.width // 2 or \
-        self.game.player == 2 and self.ball.rect.centerx > self.game.width // 2:
+                self.game.player == 2 and self.ball.rect.centerx > self.game.width // 2:
             if self.ball.rect.top <= 0 or self.ball.rect.bottom >= self.game.height:
                 self.ball.border_bounce()
 
@@ -197,6 +197,7 @@ class Match(Scene):
                     self.pressed_up = False
                 elif e.key == K_DOWN:
                     self.pressed_down = False
+
 
 class GameOver(Scene):
     def __init__(self):
