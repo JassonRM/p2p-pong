@@ -31,6 +31,6 @@ def simple_udp_server():
             addresses.pop(0)
 
 if __name__ == '__main__':
-    _thread.start_new_thread(simple_udp_server)
+    _thread.start_new_thread(simple_udp_server,())
     while True:
         pass
