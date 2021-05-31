@@ -31,16 +31,21 @@ class Menu(Scene):
         super().__init__()
         self.font = pygame.font.Font('resources/bit5x3.ttf', 56)
         self.sfont = pygame.font.Font('resources/bit5x3.ttf', 32)
+        self.info_text = "Waiting for another player..."
+
 
     def render(self, screen):
         screen.fill((0, 0, 0))
-        text1 = self.font.render('P2P Pong', True, (255, 255, 255))
-        text2 = self.sfont.render('> press space to start <', True, (255, 255, 255))
-        screen.blit(text1, ((self.game.width - text1.get_width()) // 2, self.game.height // 3))
-        screen.blit(text2, ((self.game.width - text2.get_width()) // 2, self.game.height * 2 // 3))
+        title = self.font.render('P2P Pong', True, (255, 255, 255))
+        info = self.sfont.render(self.info_text, True, (255, 255, 255))
+        screen.blit(title, ((self.game.width - title.get_width()) // 2, self.game.height // 3))
+        screen.blit(info, ((self.game.width - info.get_width()) // 2, self.game.height * 2 // 3))
 
     def update(self):
-        pass
+        if self.game.network_thread.is_alive():
+            self.info_text = "Waiting for another player..."
+        else:
+            self.info_text = '> Press space to start <'
 
     def handle_events(self, events):
         for e in events:
@@ -157,8 +162,12 @@ class Match(Scene):
         self.game.connection.write(json.dumps(message))
 
         # Receive enemy status
-        data = self.game.connection.receive()
+        data = self.game.connection.read()
+        if data is None:
+            return
+        print("Data: ", data)
         enemy_status = json.loads(data)
+        print("JSON: ", enemy_status)
 
         # Update score
         if enemy_status["score"] and self.game.player == 1:

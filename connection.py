@@ -17,14 +17,13 @@ class Connection:
     def hole_punching(self):
         self.socket = socket.socket(socket.AF_INET,  # Internet
                                     socket.SOCK_DGRAM)  # UDP
+
+        # Request IP address and port from server
         self.socket.sendto(b'0', (self.host, self.port))
         data, addr = self.socket.recvfrom(1024)
-        print('client received: {} {}'.format(addr, data))
+        print('Client received: {} {}'.format(addr, data))
         addr = msg_to_addr(data)
         self.sendToAddress = addr
-        self.socket.sendto(b'0', addr)
-        data, addr = self.socket.recvfrom(1024)
-        print('client received: {} {}'.format(addr, data))
 
     def write(self, message):
         message = message.encode(encoding='UTF-8', errors='strict')
@@ -35,7 +34,7 @@ class Connection:
             [self.socket], [], [], 10
         )
         if ready_sockets:
-            message = self.socket.recvfrom(1024)
+            message, _ = self.socket.recvfrom(1024)
             return message.decode('utf8', 'strict')
         else:
-            return "No"
+            return None

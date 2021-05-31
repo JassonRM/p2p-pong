@@ -1,21 +1,26 @@
 import pygame
 from scenes import Menu
 from pygame.locals import QUIT
+from connection import Connection
+import threading
 
 
 class Game:
-    def __init__(self, width, height, screen, connection):
-
+    def __init__(self, width, height, server_ip):
+        pygame.init()
+        pygame.display.set_caption("P2P Pong")
         self.width = width
         self.height = height
-        self.screen = screen
+        self.screen = pygame.display.set_mode((width, height))
         self.running = False
         self.clock = pygame.time.Clock()
         self.scene = Menu()
         self.scene.game = self
-        self.player = 1
         self.winner = 0
-        self.connection = connection
+        self.connection = Connection(server_ip, 8000)
+        self.player = 1
+        self.network_thread = threading.Thread(target=self.connection.hole_punching)
+        self.network_thread.start()
 
     def run(self):
         self.running = True
