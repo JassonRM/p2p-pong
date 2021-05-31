@@ -77,6 +77,7 @@ class Match(Scene):
         self.pressed_up = False
         self.pressed_down = False
         self.font = pygame.font.Font('resources/bit5x3.ttf', 120)
+        self.lost_packets = 0
 
     def render(self, screen):
         screen.fill((0, 0, 0))
@@ -180,7 +181,11 @@ class Match(Scene):
         data = self.game.connection.read()
         try:
             enemy_status = json.loads(data)
+            self.lost_packets = 0
         except Exception:
+            self.lost_packets += 1
+            if self.lost_packets > 100:
+                self.game.go_to(ConnectionLost())
             return
 
         # Update score
@@ -241,4 +246,29 @@ class GameOver(Scene):
         for e in events:
             if e.type == KEYDOWN and e.key == K_SPACE:
                 self.game.winner = 0
+                self.game.go_to(Menu())
+
+
+class ConnectionLost(Scene):
+    def __init__(self):
+        super().__init__()
+        self.font = pygame.font.Font('resources/bit5x3.ttf', 56)
+        self.sfont = pygame.font.Font('resources/bit5x3.ttf', 32)
+
+    def render(self, screen):
+        screen.fill((0, 0, 0))
+        message = 'Connection lost'
+        text1 = self.font.render(message, True, (255, 255, 255))
+        text2 = self.sfont.render('> press space to return to menu <', True, (255, 255, 255))
+        screen.blit(text1, ((self.game.width - text1.get_width()) // 2, self.game.height // 3))
+        screen.blit(text2, ((self.game.width - text2.get_width()) // 2, self.game.height * 2 // 3))
+
+    def update(self):
+        pass
+
+    def handle_events(self, events):
+        for e in events:
+            if e.type == KEYDOWN and e.key == K_SPACE:
+                self.game.winner = 0
+                self.game.network_thread.start()
                 self.game.go_to(Menu())
