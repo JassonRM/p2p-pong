@@ -11,6 +11,7 @@ from player import Player, CollisionSide
 from ball import Ball
 import json
 import random
+import threading
 
 
 class Scene:
@@ -58,7 +59,7 @@ class Menu(Scene):
                     self.info_text = '> Press space to start <'
                     self.ready = True
 
-                except ValueError: # This means received is no longer the ticket and the game started
+                except ValueError:  # This means received is no longer the ticket and the game started
                     self.game.go_to(Match())
 
     def handle_events(self, events):
@@ -179,13 +180,18 @@ class Match(Scene):
 
         # Receive enemy status
         data = self.game.connection.read()
-        try:
-            enemy_status = json.loads(data)
-            self.lost_packets = 0
-        except Exception:
+
+        # Check if connection is alive
+        if data is None:
             self.lost_packets += 1
-            if self.lost_packets > 100:
+            if self.lost_packets > 120:
                 self.game.go_to(ConnectionLost())
+            return
+
+        enemy_status = json.loads(data)
+        self.lost_packets = 0
+
+        if isinstance(enemy_status, float):
             return
 
         # Update score
@@ -270,5 +276,6 @@ class ConnectionLost(Scene):
         for e in events:
             if e.type == KEYDOWN and e.key == K_SPACE:
                 self.game.winner = 0
+                self.game.network_thread = threading.Thread(target=self.game.connection.hole_punching)
                 self.game.network_thread.start()
                 self.game.go_to(Menu())
