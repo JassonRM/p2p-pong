@@ -188,7 +188,7 @@ class Match(Scene):
         # Check if connection is alive
         if data is None:
             self.lost_packets += 1
-            if self.lost_packets > 3:
+            if self.lost_packets > 120:
                 self.game.go_to(ConnectionLost())
             return
 
