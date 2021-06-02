@@ -48,6 +48,7 @@ class Menu(Scene):
         if not self.game.network_thread.is_alive():
             if self.game.connection.sendToAddress is None:
                 self.game.go_to(ConnectionLost('Player not found'))
+                return
             self.game.connection.write(str(self.my_ticket))
             received = self.game.connection.read()
             if received is not None:
