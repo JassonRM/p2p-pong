@@ -79,6 +79,8 @@ class Match(Scene):
         self.pressed_down = False
         self.font = pygame.font.Font('resources/bit5x3.ttf', 120)
         self.lost_packets = 0
+        self.packet_count = 0
+        self.last_packet = -1
 
     def render(self, screen):
         screen.fill((0, 0, 0))
@@ -166,7 +168,8 @@ class Match(Scene):
                        "balldx": self.ball.speed_x,
                        "balldy": self.ball.speed_y,
                        "score": enemy_score,
-                       "winner": self.game.winner}
+                       "winner": self.game.winner,
+                       "packet_count": self.packet_count}
 
         # Send only player position
         else:
@@ -176,11 +179,13 @@ class Match(Scene):
                        "balldx": self.ball.speed_x,
                        "balldy": self.ball.speed_y,
                        "score": False,
-                       "winner": self.game.winner
+                       "winner": self.game.winner,
+                       "packet_count": self.packet_count
                        }
 
         # Send message
         self.game.connection.write(json.dumps(message))
+        self.packet_count += 1
 
         # Receive enemy status
         data = self.game.connection.read()
@@ -195,8 +200,11 @@ class Match(Scene):
         enemy_status = json.loads(data)
         self.lost_packets = 0
 
-        if isinstance(enemy_status, float):
+        if isinstance(enemy_status, float) or \
+                enemy_status["packet_count"] < self.last_packet:
             return
+
+        self.last_packet = enemy_status["packet_count"]
 
         # Update score
         if enemy_status["score"] and self.game.player == 1:
