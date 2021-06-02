@@ -25,16 +25,26 @@ class Connection:
         addr = msg_to_addr(data)
         self.sendToAddress = addr
 
+        self.socket.setblocking(0)
+        self.socket.settimeout(0.002)
+
     def write(self, message):
         message = message.encode(encoding='UTF-8', errors='strict')
         self.socket.sendto(message, self.sendToAddress)
 
     def read(self):
-        ready_sockets, _, _ = select.select(
-            [self.socket], [], [], 0.015
-        )
-        if ready_sockets:
-            message, _ = self.socket.recvfrom(1024)
-            return message.decode('utf8', 'strict')
+        messages = []
+        while True:
+            try:
+                data, _ = self.socket.recvfrom(1024)
+                messages.append(data.decode('utf8', 'strict'))
+            except socket.timeout:
+                break
+            except OSError:
+                break
+
+        if len(messages) != 0:
+            return messages[-1]
         else:
             return None
+

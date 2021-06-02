@@ -120,9 +120,11 @@ class Match(Scene):
         if self.game.player == 1:
             player = self.player1
             enemy = self.player2
+            enemy_score = self.p2_score
         else:
             player = self.player2
             enemy = self.player1
+            enemy_score = self.p1_score
 
         # Player movement and collisions
         if self.pressed_up and player.rect.top > 0:
@@ -131,7 +133,7 @@ class Match(Scene):
             player.down()
 
         # Ball collisions if in my playing field
-        if self.game.player == 1 and self.ball.rect.centerx < self.game.width // 2 or \
+        if self.game.player == 1 and self.ball.rect.centerx <= self.game.width // 2 or \
                 self.game.player == 2 and self.ball.rect.centerx > self.game.width // 2:
             if self.ball.rect.top <= 0 or self.ball.rect.bottom >= self.game.height:
                 self.ball.border_bounce()
@@ -142,10 +144,9 @@ class Match(Scene):
                 angle = (player.rect.centery - self.ball.rect.centery) / player.rect.height
                 self.ball.player_bounce(angle)
 
-            enemy_score = False
             if self.game.player == 1 and self.ball.rect.left <= 0:
                 self.p2_score += 1
-                enemy_score = True
+                enemy_score = self.p2_score
                 if self.p2_score == 10:
                     self.game.winner = 2
                     self.game.go_to(GameOver())
@@ -154,13 +155,15 @@ class Match(Scene):
                                    (self.game.height - self.ball.rect.height) // 2)
             elif self.game.player == 2 and self.ball.rect.right >= self.game.width:
                 self.p1_score += 1
-                enemy_score = True
+                enemy_score = self.p2_score
                 if self.p1_score == 10:
                     self.game.winner = 1
                     self.game.go_to(GameOver())
                 else:
                     self.ball.move((self.game.width - self.ball.rect.width) // 2,
                                    (self.game.height - self.ball.rect.height) // 2)
+
+            self.ball.update()
 
             message = {"position": player.rect.y,
                        "ballx": self.ball.rect.x,
@@ -178,7 +181,7 @@ class Match(Scene):
                        "bally": self.ball.rect.y,
                        "balldx": self.ball.speed_x,
                        "balldy": self.ball.speed_y,
-                       "score": False,
+                       "score": enemy_score,
                        "winner": self.game.winner,
                        "packet_count": self.packet_count
                        }
@@ -207,10 +210,10 @@ class Match(Scene):
         self.last_packet = enemy_status["packet_count"]
 
         # Update score
-        if enemy_status["score"] and self.game.player == 1:
-            self.p1_score += 1
-        elif enemy_status["score"] and self.game.player == 2:
-            self.p2_score += 1
+        if self.game.player == 1:
+            self.p1_score = enemy_status["score"]
+        elif self.game.player == 2:
+            self.p2_score = enemy_status["score"]
 
         if enemy_status["winner"] != 0:
             self.game.winner = enemy_status["winner"]
@@ -221,13 +224,12 @@ class Match(Scene):
 
         # Update ball if in enemy's field
         if self.game.player == 1 and self.ball.rect.centerx > self.game.width // 2 or \
-                self.game.player == 2 and self.ball.rect.centerx < self.game.width // 2:
+                self.game.player == 2 and self.ball.rect.centerx <= self.game.width // 2:
             self.ball.set(enemy_status["ballx"],
                           enemy_status["bally"],
                           enemy_status["balldx"],
                           enemy_status["balldy"])
 
-        self.ball.update()
 
     def handle_events(self, events):
         for e in events:
