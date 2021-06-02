@@ -148,7 +148,7 @@ class Match(Scene):
             if self.game.player == 1 and self.ball.rect.left <= 0:
                 self.p2_score += 1
                 enemy_score = self.p2_score
-                if self.p2_score == 10:
+                if self.p2_score == 5:
                     self.game.winner = 2
                     self.game.go_to(GameOver())
                 else:
@@ -157,7 +157,7 @@ class Match(Scene):
             elif self.game.player == 2 and self.ball.rect.right >= self.game.width:
                 self.p1_score += 1
                 enemy_score = self.p2_score
-                if self.p1_score == 10:
+                if self.p1_score == 5:
                     self.game.winner = 1
                     self.game.go_to(GameOver())
                 else:
