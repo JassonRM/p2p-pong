@@ -46,7 +46,8 @@ class Menu(Scene):
 
     def update(self):
         if not self.game.network_thread.is_alive():
-            self.info_text = 'Player found. Connecting...'
+            if self.game.connection.sendToAddress is None:
+                self.game.go_to(ConnectionLost('Player not found'))
             self.game.connection.write(str(self.my_ticket))
             received = self.game.connection.read()
             if received is not None:
@@ -197,7 +198,7 @@ class Match(Scene):
         if data is None:
             self.lost_packets += 1
             if self.lost_packets > 120:
-                self.game.go_to(ConnectionLost())
+                self.game.go_to(ConnectionLost('Connection lost'))
             return
 
         enemy_status = json.loads(data)
@@ -270,15 +271,15 @@ class GameOver(Scene):
 
 
 class ConnectionLost(Scene):
-    def __init__(self):
+    def __init__(self, message):
         super().__init__()
         self.font = pygame.font.Font('resources/bit5x3.ttf', 56)
         self.sfont = pygame.font.Font('resources/bit5x3.ttf', 32)
+        self.message = message
 
     def render(self, screen):
         screen.fill((0, 0, 0))
-        message = 'Connection lost'
-        text1 = self.font.render(message, True, (255, 255, 255))
+        text1 = self.font.render(self.message, True, (255, 255, 255))
         text2 = self.sfont.render('> press space to return to menu <', True, (255, 255, 255))
         screen.blit(text1, ((self.game.width - text1.get_width()) // 2, self.game.height // 3))
         screen.blit(text2, ((self.game.width - text2.get_width()) // 2, self.game.height * 2 // 3))

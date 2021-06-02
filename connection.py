@@ -11,8 +11,8 @@ class Connection:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.sendToAddress = 0
-        self.socket = 0
+        self.sendToAddress = None
+        self.socket = None
 
     def hole_punching(self):
         self.socket = socket.socket(socket.AF_INET,  # Internet
