@@ -10,9 +10,8 @@ from pygame.locals import (
 from player import Player, CollisionSide
 from ball import Ball
 import json
-import random
+import secrets
 import threading
-
 
 class Scene:
     def __init__(self):
@@ -35,7 +34,7 @@ class Menu(Scene):
         self.sfont = pygame.font.Font('resources/bit5x3.ttf', 32)
         self.info_text = "Waiting for another player..."
         self.ready = False
-        self.my_ticket = random.random()
+        self.my_ticket = secrets.SystemRandom()
 
     def render(self, screen):
         screen.fill((0, 0, 0))
